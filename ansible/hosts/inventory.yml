@@ -1,0 +1,14 @@
+all:
+  children:
+    localhost:
+      hosts:
+        18.130.224.235:
+          ansible_host: ec2-18-130-224-235.eu-west-2.compute.amazonaws.com
+          ansible_user: root
+          ansible_ssh_private_key_file: /root/.ssh/id_rsa
+    dev_all:
+      children:
+        dev_sandbox:
+          hosts:
+            lnx005226.oci.erponprem.com:
+

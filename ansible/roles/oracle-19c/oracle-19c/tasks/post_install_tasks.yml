@@ -1,0 +1,60 @@
+---
+- name: Set SELinux to enforcing mode
+  import_role:
+    name: selinux-config
+  vars:
+    selinux_state: enforcing
+
+- name: Get DATA disk group compatabile.asm value
+  ansible.builtin.shell: |
+    ORACLE_SID=+ASM
+    ORAENV_ASK=NO
+    source oraenv > /dev/null
+    asmcmd lsattr -l -G DATA --suppressheader compatible.asm | awk '{print $NF}'
+  register: datadgcompatible
+  become_user: "{{ oracle_install_user }}"
+  become: yes
+  environment: "{{ grid_env }}"
+
+- name: Add FLASH disk group
+  ansible.builtin.shell: |
+    main() {
+      echo 'sqlplus -s / as sysasm <<< "create diskgroup FLASH external redundancy disk {{ oracle_flash_diskgroup_sql }} attribute 'compatible.asm' = '{{ datadgcompatible.stdout }}';"'
+      source oraenv <<< +ASM
+      sqlplus -s / as sysasm <<< "create diskgroup FLASH external redundancy disk {{ oracle_flash_diskgroup_sql }} attribute 'compatible.asm' = '{{ datadgcompatible.stdout }}';"
+    }
+    main 2>&1 | logger -p local3.info -t ansible-oracle-db
+  become_user: "{{ oracle_install_user }}"
+  become: yes
+  environment: "{{ grid_env }}"
+
+- name: Save spfile location
+  ansible.builtin.shell: |
+    source oraenv <<< +ASM
+    asmcmd spget > {{ temp }}/spfilelocation.txt
+  become_user: "{{ oracle_install_user }}"
+  become: yes
+  environment: "{{ grid_env }}"
+
+- name: Clean up {{ stage }} directory
+  ansible.builtin.file:
+    path: "{{ stage }}/{{ item }}"
+    state: absent
+  loop:
+    - "{{ grid_response_file }}"
+    - "{{ grid_install_script }}"
+    - "{{ grid_software }}"
+    - "{{ oracle_patch.psu_patch }}"
+    - "{{ opatch }}"
+    - "{{ stage }}/psu"
+    - "{{ database_response_file }}"
+    - "{{ database_install_script }}"
+    - "{{ db_software }}"
+
+- name: Create database version hidden file for bootstapping phase
+  ansible.builtin.lineinfile:
+    create: yes
+    path: "~/.db_version"
+    line: "19c"
+
+-- 

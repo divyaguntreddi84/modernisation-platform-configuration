@@ -1,0 +1,17 @@
+ansible_user: e076704
+artifactory_url: https://artifactory.erponprem.com
+
+# defaults vars for ansibles
+timestamp: "{{lookup('pipe', 'date +%Y-%m-%d-%H:%M:%S')}}"
+vdate_date: "{{lookup('pipe', 'date +%Y%m%d')}}"
+
+# domain name for fqdn instances
+domain_name: "oci.erponprem.com"
+
+###package sources###
+par_request: "https://objectstorage.eu-paris-1.oraclecloud.com/p/O8qCiWdAW3VQeCZx3LbcBlTpkKANFD50FpmlL3FO7bBxyN50D2SAu0-_2SOmsZtN/n/axagx9w68uqo/b/PAR_FOP_BUC_EXC/o"
+
+# e076704 ldap one
+ansible_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  xxx

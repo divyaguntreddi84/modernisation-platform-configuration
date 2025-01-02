@@ -1,0 +1,51 @@
+---
+
+ansible_aws_ssm_bucket_name: s3-bucket
+db_backup_s3_bucket_name: prod-db-backup-bucket
+image_builder_s3_bucket_name: PAR_FOP_OST_TMP
+dns_zone_internal: michelin.com
+dns_search_domains:
+  - michelin.com
+  - oci.michelin.root
+winrm_domain_name_fqdn: oci.michelin.root
+
+oracle_path: /usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
+db_env:
+  ORACLE_HOME: "{{ database_home }}"
+  PATH: "{{ database_home }}/bin:{{ oracle_path }}"
+oracle_ru_patch: OCT2024
+OMS_SERVER: sandbox-oem.oci.michelin.com
+OEM_AGENT_VERSION: 13.5.0.0.0
+
+# rman details
+rman_backup_script: rman_backup.sh
+recovery_catalog: 1
+recovery_catalog_server: "{{ OMS_SERVER }}"
+rman_backup_cron:
+  backup_level_0:
+    - name: rman_backup_weekly
+      weekday: "6"
+      minute: "30"
+      hour: "04"
+      # job: command generated in rman-backup-setup
+  backup_level_1:
+    - name: rman_backup_daily
+      weekday: "0-5"
+      minute: "30"
+      hour: "04"
+      # job: command generated in rman-backup-setup
+
+michelin_configs:
+  prod:
+    url: sandbox.michelin.com
+
+db_configs:
+  PDBDEV2:
+    db_name: PDBDEV2
+    db_unique_name: PDBDEV2
+    instance_name: PDBDEV2
+    host_name: parx01-zf5km1.nprintexc.parfopvcnnprint.oraclevcn.com
+    port: 1521
+    tns_name: PDBDEV2
+    service:
+      - { name: PDBDEV2_SUPPORT, role: PRIMARY }

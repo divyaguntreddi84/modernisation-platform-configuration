@@ -1,0 +1,101 @@
+---
+artefacts_s3_bucket_name: mod-platform-image-artefact-bucket20230203091453221500000001
+artefacts_s3_bucket_path: erponprem/oracle-19c-software
+artefact_dir: /u02
+app_dir: /u01/app
+oracle_install_user: oracle
+oracle_install_group: oinstall
+oracle_asmlib_rpm: oracleasmlib-2.0.17-1.el8.x86_64.rpm
+oracle_prereq_rpm: oracle-database-preinstall-19c-1.0-2.el8.x86_64.rpm
+oracleasm_support_rpm: oracleasm-support-2.1.12-1.el8.x86_64.rpm
+bkpdate: "{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}"
+
+stage: "{{ artefact_dir }}/stage"
+temp: "{{ artefact_dir }}/temp"
+patch: "{{ stage }}/patches"
+oracle_home: "{{ app_dir }}/oracle/product/19c"
+oracle_inventory: "{{ app_dir }}/oraInventory"
+oracle_path: /usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin # this is to avoid having to source oracle environment variables
+
+database_response_file: db_install.rsp
+database_base: "{{ app_dir }}/oracle"
+database_home: "{{ oracle_home }}/db_1"
+db_software: LINUX.X64_193000_db_home.zip
+database_install_script: db_install.sh
+
+grid_response_file: grid_install.rsp
+grid_base: "{{ app_dir }}/grid"
+grid_home: "{{ oracle_home }}/gridhome_1"
+grid_software: LINUX.X64_193000_grid_home.zip
+grid_install_script: grid_install.sh
+
+password_response_file: grid_pw.rsp
+
+db_secretsmanager_passwords:
+  asm:
+    secret: "/ec2/{{ ec2_name }}/asm-passwords"
+    users:
+      - ASMSNMP: auto
+      - ASMSYS: auto
+
+grid_env:
+  ORACLE_HOME: "{{ grid_home }}"
+  PATH: "{{ grid_home }}/bin:{{ oracle_path }}"
+
+db_env:
+  ORACLE_HOME: "{{ database_home }}"
+  PATH: "{{ database_home }}/bin:{{ oracle_path }}"
+
+oracle_asm_data_disks: # the 'device' needs to match the device name in AWS
+  - device: /dev/sde
+    label: DATA01
+
+oracle_asm_flash_disks:
+  - device: /dev/sdj
+    label: FLASH01
+
+oracle_externaljob_rdbms_path: "{{ oracle_home }}/db_1/rdbms/admin"
+oracle_externaljob_file: externaljob.ora
+
+psu_patch: "{{ oracle_patch.psu_patch }}"
+
+oracle_patch_details:
+  APR2023:
+    opatch_version: 12.2.0.1.37
+    oracle_combo_patch: 35058172
+    oracle_release_update: 35037840
+    oracle_ojvm_patch: 35050341
+    psu_patch: p35058172_190000_Linux-x86-64.zip
+    patch_string: "19.19.0.0.230418"
+
+  OCT2023:
+    opatch_version: 12.2.0.1.37
+    oracle_combo_patch: 35742441
+    oracle_release_update: 35642822
+    oracle_ojvm_patch: 35648110
+    psu_patch: p35742441_190000_Linux-x86-64.zip
+    patch_string: "19.21.0.0.231017"
+
+  JAN2024:
+    opatch_version: 12.2.0.1.41
+    oracle_combo_patch: 36031453
+    oracle_release_update: 35940989
+    oracle_ojvm_patch: 35926646
+    psu_patch: p36031453_190000_Linux-x86-64.zip
+    patch_string: "19.22.0.0.240116"
+
+  JUL2024:
+    opatch_version: 12.2.0.1.43
+    oracle_combo_patch: 36522439
+    oracle_release_update: 36582629
+    oracle_ojvm_patch: 36414915
+    psu_patch: p36522439_190000_Linux-x86-64.zip
+    patch_string: "19.24.0.0.240716"
+
+oracle_ru_patch: JUL2024 # override this in group_vars when rolling out a new patch
+oracle_patch: "{{ oracle_patch_details[ oracle_ru_patch ] }}"
+opatch: "p6880880_190000_Linux-x86-64.{{ oracle_patch.opatch_version }}.zip"
+#opatch: "p6880880_190000_Linux-x86-64.zip"
+#opatch_zip: "p6880880_190000_Linux-x86-64.zip"
+opatch_zip: "p6880880_190000_Linux-x86-64-12.2.0.1.43.zip"
+oracle_version: "{{ oracle_patch.patch_string.split('.')[:3] | join('.') }}"

@@ -1,0 +1,144 @@
+---
+ansible_aws_ssm_bucket_name: s3-bucket20220427111226925000000002
+db_backup_s3_bucket_name: eroponprem-db-backup-bucket20220427111226918600000001
+image_builder_s3_bucket_name: ec2-image-builder-eroponprem20220314103938567000000001
+dns_zone_internal: eroponprem.erpps-production.modernisation-platform.internal
+dns_search_domains:
+  - erpps-oem.erpps-production.modernisation-platform.internal
+  - eroponprem-data-hub.erpps-production.modernisation-platform.internal
+  - azure.hmpp.root
+winrm_domain_name_fqdn: azure.hmpp.root
+
+oracle_path: /usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/oracle/.local/bin:/home/oracle/bin
+db_env:
+  ORACLE_HOME: "{{ database_home }}"
+  PATH: "{{ database_home }}/bin:{{ oracle_path }}"
+
+OMS_SERVER: prod-oem-a.erpps-oem.erpps-production.modernisation-platform.internal
+OEM_AGENT_VERSION: 13.5.0.0.0
+
+# rman details
+rman_backup_script: rman_backup.sh
+recovery_catalog: 1
+recovery_catalog_server: "{{ OMS_SERVER }}"
+rman_backup_cron:
+  backup_level_0:
+    - name: rman_backup_weekly
+      weekday: "6"
+      minute: "30"
+      hour: "04"
+      # job: command generated in rman-backup-setup
+  backup_level_1:
+    - name: rman_backup_daily
+      weekday: "0-5"
+      minute: "30"
+      hour: "04"
+      # job: command generated in rman-backup-setup
+
+eroponprem_configs:
+  prod:
+    url: c.eroponprem.service.domain.co.uk
+
+db_configs:
+  RCVCAT:
+    rcvcat_db_name: PRCVCAT
+  PCNOM: # workaround since weblogic reference PCNOM in oracle-db-name tag
+    db_name: PCNOM
+  PDCNOM:
+    db_name: PDCNOM
+    db_unique_name: PDCNOM
+    instance_name: PDCNOM
+    host_name: prod-eroponprem-db-1-a.production.eroponprem.service.domain.co.uk
+    port: 1521
+    tns_name: PDCNOM
+    service:
+      - { name: OR_TAF, role: PRIMARY }
+      - { name: eroponprem_TAF, role: PRIMARY }
+      - { name: OLDeroponprem_TAF, role: PRIMARY }
+      - { name: eroponprem_APIRO, role: PRIMARY }
+  PDNDH:
+    db_name: NDHP
+    db_unique_name: PDNDH
+    instance_name: PDNDH
+    host_name: prod-eroponprem-db-1-a.production.eroponprem.service.domain.co.uk
+    port: 1521
+    tns_name: PDNDH
+    service:
+      - { name: NDH_TAF, role: PRIMARY }
+  PDTRDAT:
+    db_name: TRDATP
+    db_unique_name: PDTRDAT
+    instance_name: PDTRDAT
+    host_name: prod-eroponprem-db-1-a.production.eroponprem.service.domain.co.uk
+    port: 1521
+    tns_name: PDTRDAT
+    service:
+      - { name: TRDAT_TAF, role: PRIMARY }
+  PDMIS:
+    db_name: MISP
+    db_unique_name: PDMIS
+    instance_name: PDMIS
+    host_name: prod-eroponprem-db-1-a.production.eroponprem.service.domain.co.uk
+    port: 1521
+    tns_name: PDMIS
+    service:
+      - { name: MIS_TAF, role: PRIMARY }
+  PDCNMAUD:
+    db_name: CNOMAUDP
+    db_unique_name: PDCNMAUD
+    instance_name: PDCNMAUD
+    host_name: prod-eroponprem-db-1-a.production.eroponprem.service.domain.co.uk
+    port: 1521
+    tns_name: PDCNMAUD
+    service:
+      - { name: CNMAUD_TAF, role: PRIMARY }
+  DRCNOM:
+    db_name: CNOMP
+    db_unique_name: DRCNOM
+    instance_name: DRCNOM
+    host_name: prod-eroponprem-db-1-b.production.eroponprem.service.domain.co.uk
+    port: 1521
+    tns_name: DRCNOM
+    service:
+      - { name: eroponprem_TAF, role: PRIMARY }
+      - { name: OLDeroponprem_TAF, role: PRIMARY }
+      - { name: eroponprem_APIRO_TAF, role: PHYSICAL_STANDBY }
+      - { name: OR_TAF, role: PHYSICAL_STANDBY }
+  DRNDH:
+    db_name: NDHP
+    db_unique_name: DRNDH
+    instance_name: DRNDH
+    host_name: prod-eroponprem-db-1-b.production.eroponprem.service.domain.co.uk
+    port: 1521
+    tns_name: DRNDH
+    service:
+      - { name: NDH_TAF, role: PRIMARY }
+  DRTRDAT:
+    db_name: TRDATP
+    db_unique_name: DRTRDAT
+    instance_name: DRTRDAT
+    host_name: prod-eroponprem-db-1-b.production.eroponprem.service.domain.co.uk
+    port: 1521
+    tns_name: DRTRDAT
+    service:
+      - { name: TRDAT_TAF, role: PRIMARY }
+  DRMIS:
+    db_name: MISP
+    db_unique_name: DRMIS
+    instance_name: DRMIS
+    host_name: prod-eroponprem-db-2-b
+    port: 1521
+    tns_name: DRMIS
+    service:
+      - { name: MIS_TAF, role: PRIMARY }
+
+# Oracle database housekeeping
+audit_housekeeping_period: 60
+db_housekeeping_script: db_server_housekeeping.sh
+housekeeping_cron:
+  db_server_housekeeping:
+    - name: database_server_housekeeping
+      weekday: "0"
+      minute: "30"
+      hour: "08"
+      # job: command generated in

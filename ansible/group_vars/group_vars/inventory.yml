@@ -1,0 +1,12 @@
+---
+localhost:
+  hosts:
+    lnx003673.oci.erponprem.com:
+######################################
+# DEV servers list
+dev_all:
+  children:
+    dev_sandbox:
+      hosts:
+        lnx005226.oci.erponprem.com:
+######################################

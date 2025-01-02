@@ -1,0 +1,41 @@
+---
+
+- import_tasks: prereqs.yml
+  tags:
+    - always
+
+- import_tasks: download_software.yml
+  tags:
+    - ec2provision
+    - amibuild
+    - oracle_19c_download
+    - oracle_19c_download_software
+
+- import_tasks: get_facts.yml
+  tags:
+    - ec2provision
+    - oracle_db_get_facts
+    - oracle_19c_download_patch
+    - oracle_19c_install_grid
+
+- import_tasks: download_patch.yml
+  tags:
+    - ec2provision
+    - ec2patch
+    - oracle_19c_download_patch
+
+- import_tasks: pre_install_tasks.yml
+jason.millard@MJ005705 tasks % ls down*
+download_patch.yml download_software.yml
+jason.millard@MJ005705 tasks % cat download_patch.yml
+---
+
+- name: Download Oracle 19c patches from S3 bucket
+  amazon.aws.aws_s3:
+    bucket: "{{ artefacts_s3_bucket_name }}"
+    object: "{{ artefacts_s3_bucket_path }}/{{ item }}"
+    dest: "{{ stage }}/{{ item }}"
+    mode: get
+    overwrite: latest
+  loop:
+    - "{{ oracle_patch.psu_patch }}"

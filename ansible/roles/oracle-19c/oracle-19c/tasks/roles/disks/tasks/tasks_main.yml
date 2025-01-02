@@ -1,0 +1,76 @@
+---
+- import_tasks: wait-for-volumes.yml
+  tags:
+    - amibuild
+    - ec2provision
+    - disks_wait_for_volumes
+
+- import_tasks: get-ebs-to-linux-device-map.yml
+  tags:
+    - always
+
+- import_tasks: partition-disk-rhel.yml
+  tags:
+    - amibuild
+    - ec2provision
+    - ec2patch
+    - disks_partition
+  when: ansible_distribution in ['RedHat', 'OracleLinux'] and disks_partition is defined
+
+# don't seem to need this
+# physical sector size seems to be determined by the ami (odd)
+# gpt vs mbr https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/volume_constraints.html
+# RH 8.5+ seems to be 4096 sector size for any disks
+# - include_tasks:
+#     file: block-size-rhel.yml
+#     apply:
+#       tags:
+#         - amibuild
+#         - ec2provision
+#         - disks_block_size
+#       vars:
+#         device_name: "{{ ebs_to_linux_device_map[item.ebs_device_name] }}"
+#         sector_size: "{{ item.sector_size }}"
+#   when: ansible_distribution in ['RedHat', 'OracleLinux'] and disks_partition is defined
+#   loop: "{{ disks_partition | selectattr('sector_size', 'defined') }}"
+
+- import_tasks: mount-disk-rhel.yml
+  tags:
+    - amibuild
+    - ec2provision
+    - ec2patch
+    - disks_mount
+  when: ansible_distribution in ['RedHat', 'OracleLinux'] and disks_mount is defined
+
+# if UUID changes, might need to disable and enable swap
+- include_tasks:
+    file: disable-swap-rhel.yml
+    apply:
+      tags:
+        - ec2provision
+        - disks_disable_swap
+      vars:
+        swap_device_name: "{{ ebs_to_linux_device_map[item.ebs_device_name] }}"
+  tags:
+    - ec2provision
+    - disks_disable_swap
+  loop: "{{ disks_mount | selectattr('fstype', 'defined') | selectattr('fstype', 'equalto', 'swap') }}"
+  when: ansible_distribution in ['RedHat', 'OracleLinux'] and disks_mount is defined
+
+- include_tasks:
+    file: enable-swap-rhel.yml
+    apply:
+      tags:
+        - amibuild
+        - ec2provision
+        - ec2patch
+        - disks_enable_swap
+      vars:
+        swap_device_name: "{{ ebs_to_linux_device_map[item.ebs_device_name] }}"
+  tags:
+    - amibuild
+    - ec2provision
+    - ec2patch
+    - disks_enable_swap
+  loop: "{{ disks_mount | selectattr('fstype', 'defined') | selectattr('fstype', 'equalto', 'swap') }}"
+  when: ansible_distribution in ['RedHat', 'OracleLinux'] and disks_mount is defined
