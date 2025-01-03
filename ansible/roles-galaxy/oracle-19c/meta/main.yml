@@ -1,0 +1,10 @@
+---
+galaxy_info:
+  author: Divya
+  description: Oracle 19c role for installation and configuration
+  company: Oracle
+  license: MIT
+  min_ansible_version: 2.9
+
+dependencies: []
+

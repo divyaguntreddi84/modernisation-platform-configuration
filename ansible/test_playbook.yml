@@ -1,0 +1,8 @@
+- hosts: all
+  roles:
+    - oracle-19c
+  tasks:
+    - name: Ensure oracle-19c role runs
+      debug:
+        msg: "Executing oracle-19c role"
+

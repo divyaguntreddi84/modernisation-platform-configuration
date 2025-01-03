@@ -1,5 +1,7 @@
 # from Galaxy
 roles:
+  - src: oracle-19c
+    name: oracle-19c
 
 collections:
   - name: community.general
@@ -23,3 +25,4 @@ collections:
   - name: community.crypto
     source: https://galaxy.ansible.com
     version: 2.15.0
+

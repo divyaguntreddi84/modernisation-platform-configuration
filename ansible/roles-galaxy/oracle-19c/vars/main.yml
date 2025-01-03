@@ -1,0 +1,44 @@
+oracle_install_responseFileVersion: "/oracle/install/rspfmt_dbinstall_response_schema_v19.0.0"
+oracle_install_option: INSTALL_DB_SWONLY
+UNIX_GROUP_NAME: "{{ oracle_install_group }}"
+INVENTORY_LOCATION: "{{ oracle_inventory }}"
+ORACLE_HOME: "{{ database_home }}"
+ORACLE_BASE: /u01/app/oracle
+oracle_install_db_InstallEdition: EE
+oracle_install_db_OSDBA_GROUP: dba
+oracle_install_db_OSOPER_GROUP: dba
+oracle_install_db_OSBACKUPDBA_GROUP: dba
+oracle_install_db_OSDGDBA_GROUP: dba
+oracle_install_db_OSKMDBA_GROUP: dba
+oracle_install_db_OSRACDBA_GROUP: dba
+oracle_install_db_rootconfig_executeRootScript: false
+oracle_install_db_rootconfig_configMethod: ""
+oracle_install_db_rootconfig_sudoPath: ""
+oracle_install_db_rootconfig_sudoUserName: ""
+oracle_install_db_CLUSTER_NODES: ""
+oracle_install_db_config_starterdb_type: ""
+oracle_install_db_config_starterdb_globalDBName: ""
+oracle_install_db_config_starterdb_SID: ""
+oracle_install_db_ConfigureAsContainerDB: ""
+oracle_install_db_config_PDBName: ""
+oracle_install_db_config_starterdb_characterSet: ""
+oracle_install_db_config_starterdb_memoryOption: ""
+oracle_install_db_config_starterdb_memoryLimit: ""
+oracle_install_db_config_starterdb_installExampleSchemas: ""
+oracle_install_db_config_starterdb_password_ALL: ""
+oracle_install_db_config_starterdb_password_SYS: ""
+oracle_install_db_config_starterdb_password_SYSTEM: ""
+oracle_install_db_config_starterdb_password_DBSNMP: ""
+oracle_install_db_config_starterdb_password_PDBADMIN: ""
+oracle_install_db_config_starterdb_managementOption: ""
+oracle_install_db_config_starterdb_omsHost: ""
+oracle_install_db_config_starterdb_omsPort: ""
+oracle_install_db_config_starterdb_emAdminUser: ""
+oracle_install_db_config_starterdb_emAdminPassword: ""
+oracle_install_db_config_starterdb_enableRecovery: ""
+oracle_install_db_config_starterdb_storageType: ""
+oracle_install_db_config_starterdb_fileSystemStorage_dataLocation: ""
+oracle_install_db_config_starterdb_fileSystemStorage_recoveryLocation: ""
+oracle_install_db_config_asm_diskGroup: ""
+oracle_install_db_config_asm_ASMSNMPPassword: ""
+

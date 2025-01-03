@@ -30,4 +30,3 @@
     asmmonitorpassword: "{{ secretsmanager_passwords_dict['asm'].passwords[asm_monitoring_secret_username] }}"
   when: ec2.tags['erponprem-environment'] is defined
 
--- 

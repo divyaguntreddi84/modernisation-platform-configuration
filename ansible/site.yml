@@ -32,36 +32,22 @@
 #
 #   # Run all tasks with ec2provision tag
 #   ansible-playbook site.yml --tags ec2provision
-
-- hosts: "{{ target | default('all') }}"
+- hosts: all
   tasks:
-    - name: Fail if unsupported ansible version
-      fail:
-        msg: "RHEL6 only works with ansible versions up to 2.12"
-      when:
-        - ansible_version.full >= "2.13.0"
-        - ansible_distribution in ['RedHat', 'OracleLinux']
-        - ansible_distribution_major_version in ['6']
-      tags: always
-
     - name: Set roles_defined fact
       set_fact:
-        # These are roles_list defined in inventory. Default is empty list.
         roles_defined: "{{ roles_list | default([]) }}"
       tags: always
 
-    # The actual roles to run is intersection of requested role arg and roles_defined.
-    # Special value "all" in role parameter means to run all defined roles.
     - name: Set roles_to_run fact
       set_fact:
-        roles_to_run: |
+        roles_to_run: >
           {% if force_role is defined %}
-          {{ force_role.split(",") | map("trim") }}
+          {{ force_role.split(",") | map("trim") | list }}
           {% elif role is not defined or role == "all" %}
-          {# all defined roles #}
-          {{ roles_defined }}
+          {{ roles_defined | list }}
           {% elif role is defined and not role == "" %}
-          {{ role.split(",") | map("trim") | intersect(roles_defined) }}
+          {{ role.split(",") | map("trim") | intersect(roles_defined) | list }}
           {% else %}
           []
           {% endif %}
@@ -74,3 +60,4 @@
       loop_control:
         loop_var: role_to_run
       tags: always
+
